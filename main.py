@@ -3,6 +3,7 @@ import sys
 import urllib
 import requests
 import csv
+import re
 
 class Post():
     def __init__(self, insta_id, max_id):
@@ -126,11 +127,7 @@ class Account():
             return self.__bio
 
         response = requests.get('https://www.instagram.com/' + self.insta_id)
-        page_source = response.text
-        import pdb; pdb.set_trace()
-        start_index = page_source.find("<meta property=\"og:description\" content=") + len("<meta property=\"og:description\" content=")
-        end_index = page_source.find("/>\n",start_index)
-        self.__bio = page_source[start_index:end_index]
+        self.__bio = re.findall('<meta property="og:description" content="(.*)" />', response.text)[0]
 
         return self.__bio
 
