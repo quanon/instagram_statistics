@@ -59,7 +59,7 @@ class PostList():
         max_id = None
 
         while True:
-            post = Post(insta_id, max_id)
+            post = Post(self.insta_id, max_id)
 
             for item in post.items:
                 self.items.append(item)
@@ -84,7 +84,7 @@ class Account():
         if self.__post_list:
             return self.__post_list
 
-        self.__post_list = PostList(insta_id).to_list()
+        self.__post_list = PostList(self.insta_id).to_list()
 
         return self.__post_list
 
@@ -131,37 +131,36 @@ class Account():
 
         return self.__bio
 
-def write_to_csv(list_name,file_name,col_names):
-    '''
-    INTAKE: a list, name of the csv file, column names of the csv file
-    RETURN: a csv file with given name and column names
-    '''
-    output_file = open(file_name+'.csv','w')
-    output_writer = csv.writer(output_file)
-    output_writer.writerow(col_names)
+class AccountCsv():
+    def __init__(self, insta_id):
+        self.insta_id = insta_id
+        self.account = Account(insta_id)
 
-    for i in list_name:
-        output_writer.writerow(i)
+    def export_all(self):
+        self.export_stats_list()
+        self.export_caption_list()
+        self.export_bio()
 
-    output_file.close()
+    def export_stats_list(self):
+        self.__export_list(self.account.stats_list, 'stats_list', ['post_id', 'num_of_likes', 'num_of_comments'])
 
-def write_bio(account):
-    '''
-    INTAKE: an Account object
-    RETURN: a csv file with bio
-    '''
-    bio = account.bio
+    def export_caption_list(self):
+        self.__export_list(self.account.caption_list, 'caption_list', ['post_id', 'caption'])
 
-    bio_file = open(insta_id + '_bio.csv','w')
-    bio_writer = csv.writer(bio_file)
-    bio_writer.writerow(['instagram_id','bio'])
-    bio_writer.writerow([insta_id, bio])
+    def export_bio(self):
+        csv_file = open(self.insta_id + '_bio.csv', 'w')
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(['instagram_id', 'bio'])
+        csv_writer.writerow([self.insta_id, self.account.bio])
+        csv_file.close()
+
+    def __export_list(self, list, file_name, column_names):
+        csv_file = open(file_name + '.csv', 'w')
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(column_names)
+        for element in list:
+            csv_writer.writerow(element)
+        csv_file.close()
 
 if __name__ == '__main__':
-    insta_id = sys.argv[1]
-
-    account = Account(insta_id)
-
-    write_to_csv(account.stats_list, 'stats_list', ['post_id','num_of_likes','num_of_comments'])
-    write_to_csv(account.caption_list, 'caption_list', ['post_id','caption'])
-    write_bio(account)
+    AccountCsv(sys.argv[1]).export_all()
