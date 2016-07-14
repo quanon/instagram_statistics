@@ -43,27 +43,51 @@ class PostList():
 
         return url
 
-def extract_statistics(post_list):
-    '''
-    INTAKE: a list of posts
-    RETURN: a dictionary of lists
-    '''
-    num_of_posts = len(post_list)
+class Account():
+    def __init__(self, insta_id):
+        self.insta_id = insta_id
+        self.post_list = []
+        self.stats_list = []
+        self.caption_list = []
 
-    stats_list = []
-    caption_list = []
+    def get_post_list(self):
+        if self.post_list:
+            return self.post_list
 
-    for i in range(0, num_of_posts):
-        stats_list.append([post_list[i]['code'], post_list[i]['likes']['count'], post_list[i]['comments']['count']])
-        if post_list[i]['caption'] == None: # check if there is caption
-            caption_list.append([post_list[i]['code'], ''])
-        else:
-            caption_list.append([post_list[i]['code'], post_list[i]['caption']['text'].replace("\n", " ")])
-            # some captions have '\n' but we want them to be in one line
+        self.post_list = PostList(insta_id).to_list()
 
-    account_info = {'stats_list': stats_list, 'caption_list': caption_list}
+        return self.post_list
 
-    return account_info
+    def get_stats_list(self):
+        if self.stats_list:
+            return self.stats_list
+
+        post_list = self.get_post_list()
+
+        for post in post_list:
+            self.stats_list.append([
+                post['code'],
+                post['likes']['count'],
+                post['comments']['count']
+            ])
+
+        return self.stats_list
+
+    def get_caption_list(self):
+        if self.caption_list:
+            return self.caption_list
+
+        post_list = self.get_post_list()
+
+        for post in post_list:
+            caption = [post['code']]
+
+            if post['caption']:
+                caption.append(post['caption']['text'].replace('\n', ' '))
+
+            self.caption_list.append(caption)
+
+        return self.caption_list
 
 def download_photos(post_list):
     '''
@@ -115,10 +139,9 @@ def write_bio(insta_id):
 if __name__ == '__main__':
     insta_id = sys.argv[1]
 
-    post_list = PostList(insta_id).to_list()
-    account_info = extract_statistics(post_list)
+    account = Account(insta_id)
 
-    write_to_csv(account_info['stats_list'], 'stats_list', ['post_id','num_of_likes','num_of_comments'])
-    write_to_csv(account_info['caption_list'], 'caption_list', ['post_id','caption'])
+    write_to_csv(account.get_stats_list(), 'stats_list', ['post_id','num_of_likes','num_of_comments'])
+    write_to_csv(account.get_caption_list(), 'caption_list', ['post_id','caption'])
     # download_photos(post_list)
     write_bio(insta_id)
