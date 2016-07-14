@@ -131,22 +131,6 @@ class Account():
 
         return self.__bio
 
-def download_photos(post_list):
-    '''
-    INTAKE: a list of posts
-    RETURN: 0
-    '''
-    if (os.path.exists("/Users/USERNAME/Desktop/"+ insta_id) == False):
-            os.mkdir("/Users/USERNAME/Desktop/"+ insta_id)
-
-    for x in post_list:
-        url = x["images"]["standard_resolution"]["url"].replace("s640x640", "s1080x1080")
-        # will replace with high resolution version if there is one
-        file_name = x["code"]
-        urllib.urlretrieve(url, "/Users/USERNAME/Desktop/"+ insta_id + "/" + file_name + ".jpg")
-
-    return 0
-
 def write_to_csv(list_name,file_name,col_names):
     '''
     INTAKE: a list, name of the csv file, column names of the csv file
@@ -180,5 +164,4 @@ if __name__ == '__main__':
 
     write_to_csv(account.stats_list, 'stats_list', ['post_id','num_of_likes','num_of_comments'])
     write_to_csv(account.caption_list, 'caption_list', ['post_id','caption'])
-    # download_photos(post_list)
     write_bio(account)
